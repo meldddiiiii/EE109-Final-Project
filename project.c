@@ -34,10 +34,6 @@ volatile uint8_t state;
 volatile uint8_t tone_step; //0 = idle, 1/2/3 = which tone is playing
 volatile uint8_t tone_counter; // Counts down 0.1s per tone
 volatile uint8_t tone_pitch; //1 = pitch goes up, 0 = pitch goes down
-volatile char rx_buf[6];        // buffer to collect characters as they arrive
-volatile uint8_t rx_count;      // how many characters in buffer so far
-volatile uint8_t rx_started;    // 1 if we've seen '@' and are collecting
-volatile uint8_t rx_valid;      // 1 if we've successfully received a full message
 
 int main(void) {
 
@@ -48,7 +44,7 @@ int main(void) {
     timer0_init();
     usart_init();
 
-    DDRD |= (1<<3); //Set PD3 (trigger pin) as output (for servo)
+    DDRD |= (1<<3); //Set PD3 as output (rangefinder trigger)
     DDRC |= (1<<1) | (1<<2) | (1<<3); //Enable LEDS
 
     PCICR |= (1<<PCIE2); //Enable pin change interrupts for port D
@@ -79,12 +75,12 @@ int main(void) {
 
     state = WAIT;
     
-    threshold = eeprom_read_byte((void *) 10); //Use EEPROM to read threshold value
+    threshold = eeprom_read_byte((void *) 0); //Use EEPROM to read threshold value
     if (!(threshold <100 && threshold >0)) { //Threshold value must be between 1-99, if out of bounds, reset threshold to 10
         threshold = 10;
     }
 
-    OCR2A = 40;
+    OCR2A = 35;
 
     while(1) {
 
@@ -206,7 +202,33 @@ int main(void) {
             }
         }
 
-        }   
+        if (rx_valid) {
+            rx_valid = 0;   // Clear flag immediately so we don't re-process
+            
+            int remote_speed_mm;
+            sscanf((char *) rx_buf, "%d", &remote_speed_mm);   // Parse string like "-203" to integer
+            
+            // Get magnitude for display formatting
+            int abs_mm = remote_speed_mm < 0 ? -remote_speed_mm : remote_speed_mm;
+            
+            // Display remote speed on LCD lower right (in cm/sec)
+            char buf[8];
+            if (remote_speed_mm < 0) {
+                snprintf(buf, 8, "-%d.%d", abs_mm / 10, abs_mm % 10);
+            } else {
+                snprintf(buf, 8, "%d.%d", abs_mm / 10, abs_mm % 10);
+            }
+            lcd_moveto(1, 12);
+            lcd_stringout(buf);
+            
+            // Compare magnitude to threshold and play buzzer
+            int abs_cm = abs_mm / 10;
+            if (abs_cm > threshold) {
+                buzzer_play(1);   // Remote faster → ascending tones
+            } else {
+                buzzer_play(0);   // Remote slower or equal → descending tones
+            }
+        }
 
         if (changed) { // If encoder turned, clamp threshold to 1-99 and update LCD
             changed = 0;
@@ -223,4 +245,6 @@ int main(void) {
         }
 
     }
+}
+
 

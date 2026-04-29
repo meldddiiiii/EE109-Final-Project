@@ -14,6 +14,10 @@ extern volatile int32_t speed;
 extern volatile uint8_t threshold;
 extern volatile char new_state, old_state, changed;
 
+extern volatile uint8_t tone_step;
+extern volatile uint8_t tone_counter;
+extern volatile uint8_t tone_pitch;
+
 extern volatile char rx_buf[6];
 extern volatile uint8_t rx_valid;
 extern volatile uint8_t rx_started;

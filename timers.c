@@ -85,7 +85,26 @@ ISR(TIMER1_COMPA_vect) { // ISR for when TCNT1 reaches OCR1A: handles timeout in
             timer1_stop();
             PORTC |= (1<<PC1) | (1<<PC2);
             PORTC &= ~(1<<PC3);
+            OCR2A = 35;        // reset servo to 0 position (unecessary but i wanna make it cleaner)
             state = WAIT;
+        }
+    }
+
+    if (tone_step > 0) {
+        tone_counter--;
+        if (tone_counter == 0) {
+            tone_step++;
+            if (tone_step == 2) {
+                OCR0A = 38;
+                tone_counter = 3;
+            } else if (tone_step == 3) {
+                OCR0A = tone_pitch ? 19 : 77;
+                tone_counter = 3;
+            } else {                      //  tone_step is now 4
+                timer0_stop();             //   buzzer silenced
+                tone_step = 0;             //   back to idle
+                timer1_stop();             //   TIMER1 no longer needed
+            }
         }
     }
 

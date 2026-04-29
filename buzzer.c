@@ -19,10 +19,14 @@ void buzzer_play(uint8_t ascending) {
     tone_counter = 3; //3 ticks x 0.1s = 0.3s
     
     if (ascending) {
-        OCR0A = 77; //High if ascending
+        OCR0A = 77; //Start LOW for ascending (low → mid → high)
     } else {
-     CR0A = 19; // Low if descending   
+     OCR0A = 19; //Start HIGH for descending (high → mid → low)
     }
 
     timer0_start();
+
+    // Make sure TIMER1 is ticking at 0.1 sec for buzzer bookkeeping
+    timer1_init_stopwatch();
+    timer1_start_stopwatch();
 }

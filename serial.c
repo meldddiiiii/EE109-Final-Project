@@ -26,7 +26,7 @@ void usart_init(void) {
     UBRR0H = 0; //Baud rate high value
     UBRR0L = 103; //Baud rate low byte --> determined with 9600 baud
 
-    UCSR0B |= (1<<RXEN0) | (1<<TXEN0) | (1<<RXCIE0); //Enable receiever + transmitter in B register (do we need RXCIE0 as well???)
+    UCSR0B |= (1<<RXEN0) | (1<<TXEN0) | (1<<RXCIE0); // Enable receiver, transmitter, and RX interrupt
     UCSR0C |= (1<<UCSZ01) | (1<<UCSZ00); // 8 data bits per character
 
 }
