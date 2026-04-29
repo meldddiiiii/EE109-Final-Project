@@ -19,8 +19,8 @@
 #include "timers.h"
 #include "encoder.h"
 #include "project.h"
-// #include "buzzer.h"
-// #include "serial.h"
+#include "buzzer.h"
+#include "serial.h"
 
 volatile char new_state, old_state, changed; //Rotary Encoder state machine
 
@@ -34,7 +34,7 @@ volatile uint8_t state;
 volatile uint8_t tone_step; //0 = idle, 1/2/3 = which tone is playing
 volatile uint8_t tone_counter; // Counts down 0.1s per tone
 volatile uint8_t tone_pitch; //1 = pitch goes up, 0 = pitch goes down
-volatile char rx_buf[8];        // buffer to collect characters as they arrive
+volatile char rx_buf[6];        // buffer to collect characters as they arrive
 volatile uint8_t rx_count;      // how many characters in buffer so far
 volatile uint8_t rx_started;    // 1 if we've seen '@' and are collecting
 volatile uint8_t rx_valid;      // 1 if we've successfully received a full message
@@ -46,7 +46,7 @@ int main(void) {
     adc_init();
     timer2_init_servo(); //Configure Timer2 for PWM output to servo motor (dial indicator)
     timer0_init();
-  //  usart_init();
+    usart_init();
 
     DDRD |= (1<<3); //Set PD3 (trigger pin) as output (for servo)
     DDRC |= (1<<1) | (1<<2) | (1<<3); //Enable LEDS
@@ -154,7 +154,7 @@ int main(void) {
                 lcd_writecommand(1);
                 char buf[17];
 
-             //   usart_send_speed((int16_t) speed); //Sends calculated speed to the other board
+                usart_send_speed((int16_t) speed); //Sends calculated speed to the other board
 
                 // Range 1 (top left)
                 snprintf(buf, 17, "%d.%d", range_1 / 10, range_1 % 10);

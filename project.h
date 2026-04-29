@@ -14,4 +14,8 @@ extern volatile int32_t speed;
 extern volatile uint8_t threshold;
 extern volatile char new_state, old_state, changed;
 
+extern volatile char rx_buf[6];
+extern volatile uint8_t rx_valid;
+extern volatile uint8_t rx_started;
+extern volatile uint8_t rx_count;
 #endif
