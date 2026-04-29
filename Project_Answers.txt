@@ -1,0 +1,42 @@
+			     EE 109  - Spring 2026
+				  Speedometer
+
+
+Review Question 1 (Cost Analysis):
+
+Assume we are building 1000 units of this system.  Use the provided part
+numbers (see the webpage) and the digikey.com or jameco.com website to find the
+total **cost per unit** (again assume we build a quantity of 1000 units) for
+these speedometer systems.  Itemize the part costs (list each part and its unit
+cost when bought in units of 1000) and then show the final cost per unit below.
+Note: You only need to price the components used in the project (not all the
+components in your lab kit.  Also, you do not need to account for the cost of
+the circuit board or wires. In a real environment we would manufacture a PCB
+(Printed Circuit Board). As an optional task, you can search online for PCB
+manufacturers and what the costs and options are in creating a PCB.
+
+
+Review Question 2 (Health/Safety/Reliability)
+
+Assume this system was to be used in a real industrial monitoring application.
+
+Considering reliability, health, and safety...
+
+ - What scenarios might you suggest testing (considering both HW and SW) 
+    before releasing the product for use? 
+
+
+
+
+ - How might you make your design more reliable? By reliability we don't just
+   mean keeping it running correctly (though you should consider that), but
+   also how you can detect that a connected component has failed to gracefully
+   handle such situations.  You can consider both HW and SW points of failure,
+   issues related to the operational environment, etc. and how to mitigate
+   those cases.
+
+
+
+
+
+
