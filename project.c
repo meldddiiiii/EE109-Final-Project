@@ -82,6 +82,12 @@ int main(void) {
 
     OCR2A = 35;
 
+    //Displays initial threshold value after name is cleared off
+    char thr_str[4];
+    snprintf(thr_str, 4, "%2d", threshold);
+    lcd_moveto(1, 7);
+    lcd_stringout(thr_str);
+
     while(1) {
 
         if (state == WAIT) {
@@ -146,6 +152,9 @@ int main(void) {
             } else {
                 speed = ((int32_t)range_2 - (int32_t)range_1) * 10 / tenths; //Speed calculations
 
+                  // Clear the bottom row before redrawing
+    lcd_moveto(1, 0);
+
                 //Display values on LCD
                 lcd_writecommand(1);
                 char buf[17];
@@ -159,12 +168,12 @@ int main(void) {
 
                 // Range 2 (top middle)
                 snprintf(buf, 17, "%d.%d", range_2 / 10, range_2 % 10);
-                lcd_moveto(0, 8);
+                lcd_moveto(0, 6);
                 lcd_stringout(buf);
 
-                // Time (bottom right)
+                // Time (top right)
                 snprintf(buf, 17, "%d.%d", tenths / 10, tenths % 10);
-                lcd_moveto(1, 10);
+                lcd_moveto(0, 12);   // ← top right, away from remote speed
                 lcd_stringout(buf);
 
                 // Speed (bottom left)
@@ -203,30 +212,39 @@ int main(void) {
         }
 
         if (rx_valid) {
-            rx_valid = 0;   // Clear flag immediately so we don't re-process
+            rx_valid = 0; // Clear flag so we don't re-process the same message
             
             int remote_speed_mm;
-            sscanf((char *) rx_buf, "%d", &remote_speed_mm);   // Parse string like "-203" to integer
+            sscanf((char *) rx_buf, "%d", &remote_speed_mm); // Convert ASCII string to integer
             
-            // Get magnitude for display formatting
-            int abs_mm = remote_speed_mm < 0 ? -remote_speed_mm : remote_speed_mm;
+            // Get magnitude (positive version) for display formatting
+            int abs_mm;
+            if (remote_speed_mm < 0) {
+                abs_mm = -remote_speed_mm;   // Negate to make positive
+            } else {
+                abs_mm = remote_speed_mm;    // Already positive
+            }
             
-            // Display remote speed on LCD lower right (in cm/sec)
-            char buf[8];
+            // Format remote speed as a string in cm/sec with one decimal place
+            char buf[8];   
             if (remote_speed_mm < 0) {
                 snprintf(buf, 8, "-%d.%d", abs_mm / 10, abs_mm % 10);
             } else {
                 snprintf(buf, 8, "%d.%d", abs_mm / 10, abs_mm % 10);
             }
+            
+            // Clear old text in remote speed area, then write new value (lower right)
+            lcd_moveto(1, 12);
+            lcd_stringout("    ");
             lcd_moveto(1, 12);
             lcd_stringout(buf);
-            
-            // Compare magnitude to threshold and play buzzer
+
+            // Compare magnitude to threshold and play matching tone sequence
             int abs_cm = abs_mm / 10;
             if (abs_cm > threshold) {
-                buzzer_play(1);   // Remote faster → ascending tones
+                buzzer_play(1); //If faster than thrshold play ascending tone sequence
             } else {
-                buzzer_play(0);   // Remote slower or equal → descending tones
+                buzzer_play(0); // If slower than threshold play descending tone sequence
             }
         }
 
